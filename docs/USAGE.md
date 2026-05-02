@@ -1,12 +1,18 @@
 # Uso Detallado
 
-Esta guía asume que ya has levantado Docker, instalado el paquete y verificado el entorno:
+Esta guía asume que ya has instalado Ollama, levantado Docker, instalado el paquete y verificado el entorno:
 
 ```powershell
 yt-agent check
 ```
 
 El resultado esperado es que Whisper vea GPU, Chroma responda y Ollama tenga disponible `gemma4:e2b`.
+
+Si no tienes Ollama, instala primero desde [ollama.com/download](https://ollama.com/download) y descarga el modelo:
+
+```powershell
+ollama pull gemma4:e2b
+```
 
 ## Ingerir Contenido
 
@@ -125,4 +131,3 @@ Para canales grandes:
 - Usa `--skip-cached` en actualizaciones periódicas.
 - Deja Docker y Ollama activos durante toda la ingesta.
 - No subas `data/` a GitHub; puede contener audios, transcripciones y bases vectoriales grandes.
-

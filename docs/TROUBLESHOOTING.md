@@ -58,6 +58,35 @@ Luego recrea:
 docker compose up -d --build --force-recreate whisper
 ```
 
+## Ollama no Está Instalado
+
+Instálalo desde la página oficial:
+
+- Windows: [ollama.com/download/windows](https://ollama.com/download/windows)
+- macOS: [ollama.com/download/mac](https://ollama.com/download/mac)
+- Linux: [ollama.com/download/linux](https://ollama.com/download/linux)
+- Quickstart oficial: [docs.ollama.com/quickstart](https://docs.ollama.com/quickstart)
+
+Windows PowerShell:
+
+```powershell
+irm https://ollama.com/install.ps1 | iex
+```
+
+Linux:
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+Después:
+
+```powershell
+ollama list
+```
+
+Si ese comando responde, Ollama está instalado y accesible.
+
 ## Ollama no Tiene `gemma4:e2b`
 
 ```powershell
@@ -127,4 +156,3 @@ Si el canal tiene muchos videos, prueba primero:
 ```powershell
 yt-agent ingest "https://www.youtube.com/@CANAL/videos" --max-videos 3 --language es
 ```
-

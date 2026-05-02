@@ -38,16 +38,45 @@ El proyecto está pensado para trabajar con canales especializados: cursos, podc
 - Ollama corriendo en local.
 - Modelo `gemma4:e2b` disponible en Ollama.
 
-Comprueba Ollama:
+## Instalar Ollama
+
+Si ya tienes Ollama instalado, salta a la comprobación. Si no, instala Ollama desde la página oficial:
+
+- Windows: [ollama.com/download/windows](https://ollama.com/download/windows)
+- macOS: [ollama.com/download/mac](https://ollama.com/download/mac)
+- Linux: [ollama.com/download/linux](https://ollama.com/download/linux)
+- Quickstart oficial: [docs.ollama.com/quickstart](https://docs.ollama.com/quickstart)
+
+En Windows también puedes instalarlo desde PowerShell:
+
+```powershell
+irm https://ollama.com/install.ps1 | iex
+```
+
+En Linux:
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+Después de instalarlo, asegúrate de que Ollama está corriendo. En Windows/macOS normalmente queda como app en segundo plano. En Linux puedes comprobar el servicio o ejecutar `ollama serve`.
+
+Comprueba que responde:
 
 ```powershell
 ollama list
 ```
 
-Si no tienes el modelo:
+Descarga el modelo de chat que usa este proyecto:
 
 ```powershell
 ollama pull gemma4:e2b
+```
+
+Comprueba que aparece en la lista:
+
+```powershell
+ollama list
 ```
 
 ## Instalación Rápida
@@ -237,4 +266,3 @@ Este proyecto descarga y transcribe contenido de YouTube para uso local. Respeta
 ## Licencia
 
 MIT. Ver [LICENSE](LICENSE).
-

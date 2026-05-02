@@ -14,6 +14,12 @@ Levantar servicios:
 docker compose up -d --build
 ```
 
+Levantar servicios con NVIDIA CUDA:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build
+```
+
 Verificar:
 
 ```powershell
@@ -97,3 +103,8 @@ git remote add origin https://github.com/TU_USUARIO/youtube-channel-rag-agent.gi
 git push -u origin main
 ```
 
+Para este repositorio:
+
+```powershell
+git remote add origin https://github.com/JotaTerrasa/Youtube-Channel-Local-RAG.git
+```

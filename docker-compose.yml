@@ -18,14 +18,11 @@ services:
     container_name: youtube-rag-whisper
     ports:
       - "9000:9000"
-    gpus: all
     volumes:
       - ./data/whisper-cache:/root/.cache/huggingface
     environment:
-      WHISPER_MODEL: large-v3
-      WHISPER_DEVICE: cuda
-      WHISPER_COMPUTE_TYPE: float16
+      WHISPER_MODEL: ${WHISPER_MODEL:-medium}
+      WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
+      WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
       WHISPER_DOWNLOAD_ROOT: /root/.cache/huggingface
-      NVIDIA_VISIBLE_DEVICES: all
-      NVIDIA_DRIVER_CAPABILITIES: compute,utility
     restart: unless-stopped

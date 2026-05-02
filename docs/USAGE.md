@@ -6,7 +6,13 @@ Esta guía asume que ya has instalado Ollama, levantado Docker, instalado el paq
 yt-agent check
 ```
 
-El resultado esperado es que Whisper vea GPU, Chroma responda y Ollama tenga disponible `gemma4:e2b`.
+El resultado esperado es que Whisper responda, Chroma responda y Ollama tenga disponible `gemma4:e2b`.
+
+En macOS o maquinas sin NVIDIA, Whisper funcionara en CPU. En Windows/Linux con NVIDIA, levanta los servicios con el override CUDA:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build
+```
 
 Si no tienes Ollama, instala primero desde [ollama.com/download](https://ollama.com/download) y descarga el modelo:
 

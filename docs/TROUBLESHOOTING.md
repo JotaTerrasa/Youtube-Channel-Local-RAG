@@ -14,6 +14,12 @@ Levanta servicios:
 docker compose up -d --build
 ```
 
+Si estas en Windows/Linux con NVIDIA y quieres CUDA:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build
+```
+
 Mira logs:
 
 ```powershell
@@ -22,7 +28,7 @@ docker compose logs -f whisper
 
 ## Whisper no Ve GPU
 
-Comprueba CUDA en el host:
+Esto solo aplica si arrancaste con `docker-compose.cuda.yml`. Comprueba CUDA en el host:
 
 ```powershell
 nvidia-smi
@@ -64,7 +70,7 @@ Para procesar solo videos que no tengan transcripción cacheada:
 yt-agent ingest "https://www.youtube.com/@CANAL/videos" --language es --skip-cached
 ```
 
-Si el error se repite en videos largos, baja temporalmente el modelo Whisper en `docker-compose.yml`, por ejemplo de `large-v3` a `medium`, y recrea el servicio.
+Si el error se repite en videos largos, baja temporalmente el modelo Whisper. En CPU el default ya es `medium`; en CUDA puedes cambiar `WHISPER_MODEL` en `.env` a `medium` y recrear el servicio.
 
 ## La Primera Transcripción Tarda Mucho
 
@@ -87,6 +93,22 @@ Luego recrea:
 ```powershell
 docker compose up -d --build --force-recreate whisper
 ```
+
+En modo CUDA:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build --force-recreate whisper
+```
+
+## macOS y CUDA
+
+macOS no soporta CUDA. Usa el Compose base:
+
+```bash
+docker compose up -d --build
+```
+
+Esto ejecuta Whisper en CPU con `WHISPER_COMPUTE_TYPE=int8`. Es mas lento que CUDA, pero compatible. Si necesitas acelerar transcripciones en Apple Silicon con Metal/MLX, habria que anadir un backend separado basado en `mlx-whisper`.
 
 ## Ollama no Está Instalado
 

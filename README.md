@@ -1,12 +1,14 @@
 # YouTube Channel RAG Agent
 
-Agente local para convertir videos de YouTube en una base de conocimiento consultable. Puede ingerir un video, una playlist, la pestaña de videos de un canal o los Shorts, transcribir el audio con Whisper usando CUDA, indexar las transcripciones en ChromaDB y responder preguntas con un agente LangGraph usando Ollama.
+Agente local para convertir videos de YouTube en una base de conocimiento consultable. Puede ingerir un video, una playlist, la pestaña de videos de un canal o los Shorts, transcribir el audio con Whisper, indexar las transcripciones en ChromaDB y responder preguntas con un agente LangGraph usando Ollama.
 
 El proyecto está pensado para trabajar con canales especializados: cursos, podcasts técnicos, canales de investigación, formación interna, entrevistas o cualquier colección de videos donde quieras buscar ideas sin volver a ver horas de contenido.
 
 ## Qué Hace
 
-- Transcribe videos de YouTube con Whisper en Docker y GPU NVIDIA.
+- Transcribe videos de YouTube con Whisper en Docker.
+- Funciona en macOS/Windows/Linux en modo CPU.
+- Acelera Whisper con CUDA en Windows/Linux con GPU NVIDIA.
 - Procesa canales completos usando URLs como `https://www.youtube.com/@CANAL/videos`.
 - Guarda transcripciones JSON reutilizables en `data/transcripts`.
 - Divide el contenido en chunks con timestamps.
@@ -23,7 +25,7 @@ El proyecto está pensado para trabajar con canales especializados: cursos, podc
 | Orquestación agente | LangGraph |
 | LLM local | Ollama con `gemma4:e2b` |
 | Transcripción | faster-whisper |
-| GPU | Docker + CUDA |
+| Whisper runtime | Docker CPU por defecto; override CUDA opcional |
 | Vector DB | ChromaDB local |
 | Descarga YouTube | yt-dlp |
 | Embeddings | SentenceTransformers local |
@@ -34,9 +36,12 @@ El proyecto está pensado para trabajar con canales especializados: cursos, podc
 - Windows con PowerShell, Linux o macOS.
 - Python 3.10 o superior.
 - Docker y Docker Compose.
-- GPU NVIDIA con CUDA disponible para Docker.
 - Ollama corriendo en local.
 - Modelo `gemma4:e2b` disponible en Ollama.
+
+Opcional para transcripción acelerada:
+
+- GPU NVIDIA con CUDA disponible para Docker.
 
 ## Instalar Ollama
 
@@ -81,9 +86,13 @@ ollama list
 
 ## Instalación Rápida
 
+### macOS / CPU Compatible
+
+Este modo también sirve para Windows/Linux sin NVIDIA. Es más lento, pero portátil.
+
 ```powershell
-git clone https://github.com/TU_USUARIO/youtube-channel-rag-agent.git
-cd youtube-channel-rag-agent
+git clone https://github.com/JotaTerrasa/Youtube-Channel-Local-RAG.git
+cd Youtube-Channel-Local-RAG
 
 Copy-Item .env.example .env
 docker compose up -d --build
@@ -95,9 +104,12 @@ pip install -e .
 yt-agent check
 ```
 
-En Linux/macOS:
+En macOS/Linux:
 
 ```bash
+git clone https://github.com/JotaTerrasa/Youtube-Channel-Local-RAG.git
+cd Youtube-Channel-Local-RAG
+
 cp .env.example .env
 docker compose up -d --build
 
@@ -108,7 +120,36 @@ pip install -e .
 yt-agent check
 ```
 
-La primera transcripción descargará el modelo Whisper configurado en `docker-compose.yml`. Por defecto se usa `large-v3`, así que la primera ejecución puede tardar.
+### Windows/Linux con NVIDIA CUDA
+
+```powershell
+git clone https://github.com/JotaTerrasa/Youtube-Channel-Local-RAG.git
+cd Youtube-Channel-Local-RAG
+
+Copy-Item .env.example .env
+docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build
+
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e .
+
+yt-agent check
+```
+
+En Linux con NVIDIA:
+
+```bash
+cp .env.example .env
+docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build
+
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+
+yt-agent check
+```
+
+La primera transcripción descargará el modelo Whisper configurado. En CPU se usa `medium` por defecto para que macOS sea usable. En CUDA se usa `large-v3`.
 
 ## Uso
 
@@ -176,7 +217,7 @@ Fuentes:
 flowchart LR
   A["YouTube video, playlist o canal"] --> B["yt-dlp"]
   B --> C["Audio local"]
-  C --> D["Whisper CUDA API"]
+  C --> D["Whisper API Docker"]
   D --> E["Transcripción JSON"]
   E --> F["Chunking con timestamps"]
   F --> G["Embeddings locales"]
@@ -194,7 +235,9 @@ Más detalle en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 ```text
 .
 ├── docker/
-│   └── whisper/              # API FastAPI con faster-whisper y CUDA
+│   └── whisper/              # API FastAPI con faster-whisper
+│       ├── Dockerfile        # CPU portable, macOS compatible
+│       └── Dockerfile.cuda   # NVIDIA CUDA
 ├── src/
 │   └── yt_agent/             # CLI, ingesta, RAG, LangGraph
 ├── tests/                    # Tests unitarios
@@ -257,6 +300,12 @@ docker compose ps
 docker compose logs -f whisper
 docker compose logs -f chroma
 docker compose down
+```
+
+Para levantar el modo CUDA:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.cuda.yml up -d --build
 ```
 
 ## Notas Legales

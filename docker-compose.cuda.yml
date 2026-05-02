@@ -1,0 +1,12 @@
+services:
+  whisper:
+    build:
+      context: ./docker/whisper
+      dockerfile: Dockerfile.cuda
+    gpus: all
+    environment:
+      WHISPER_MODEL: ${WHISPER_MODEL:-large-v3}
+      WHISPER_DEVICE: cuda
+      WHISPER_COMPUTE_TYPE: float16
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility

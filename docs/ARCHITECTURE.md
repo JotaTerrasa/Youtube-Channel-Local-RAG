@@ -9,7 +9,7 @@ sequenceDiagram
   participant User as Usuario
   participant CLI as yt-agent CLI
   participant YTDLP as yt-dlp
-  participant Whisper as Whisper API CUDA
+  participant Whisper as Whisper API Docker
   participant Disk as data/transcripts
   participant Embed as Embedder local
   participant Chroma as ChromaDB
@@ -54,7 +54,18 @@ Servicio FastAPI que expone:
 - `GET /health`
 - `POST /transcribe`
 
-Internamente usa `faster-whisper` con:
+Tiene dos Dockerfiles:
+
+- `Dockerfile`: CPU portable, compatible con macOS/Windows/Linux.
+- `Dockerfile.cuda`: NVIDIA CUDA para Windows/Linux con GPU compatible.
+
+Internamente usa `faster-whisper`. El Compose base es CPU y multiplataforma:
+
+- `WHISPER_MODEL=medium`
+- `WHISPER_DEVICE=cpu`
+- `WHISPER_COMPUTE_TYPE=int8`
+
+El override CUDA para Windows/Linux con NVIDIA usa:
 
 - `WHISPER_MODEL=large-v3`
 - `WHISPER_DEVICE=cuda`
@@ -115,8 +126,8 @@ Todo `data/` está pensado para uso local y se ignora en Git salvo `.gitkeep`.
 ## Decisiones de Diseño
 
 - RAG en vez de fine-tuning: permite actualizar el canal sin reentrenar.
-- Whisper en Docker: separa dependencias CUDA del entorno Python local.
+- Whisper en Docker: separa las dependencias de transcripcion del entorno Python local.
+- Compose base CPU para macOS/Windows/Linux y override CUDA para NVIDIA.
 - Chroma local: simple para desarrollo y uso personal.
 - Embeddings locales: no requieren API externa ni otro modelo Ollama.
 - Fuentes con timestamps: la respuesta es verificable.
-

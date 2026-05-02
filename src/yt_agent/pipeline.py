@@ -20,8 +20,9 @@ class IngestResult:
     video_id: str
     title: str
     chunks: int
-    transcript_path: Path
+    transcript_path: Path | None
     status: str
+    error: str | None = None
 
 
 class IngestPipeline:
@@ -44,6 +45,7 @@ class IngestPipeline:
         language: str | None = None,
         force_transcribe: bool = False,
         skip_cached: bool = False,
+        continue_on_error: bool = True,
         on_progress: ProgressCallback | None = None,
     ) -> list[IngestResult]:
         progress = on_progress or (lambda message: None)
@@ -60,56 +62,72 @@ class IngestPipeline:
                 else None
             )
 
-            if transcript_path and transcript_path.exists() and not force_transcribe:
-                if skip_cached:
-                    progress(
-                        f"[{index}/{len(videos)}] Ya existe transcripcion; saltando: "
-                        f"{video.title}"
-                    )
-                    results.append(
-                        IngestResult(
-                            video_id=video.video_id or "",
-                            title=video.title,
-                            chunks=0,
-                            transcript_path=transcript_path,
-                            status="skipped_cached",
+            try:
+                if transcript_path and transcript_path.exists() and not force_transcribe:
+                    if skip_cached:
+                        progress(
+                            f"[{index}/{len(videos)}] Ya existe transcripcion; saltando: "
+                            f"{video.title}"
                         )
+                        results.append(
+                            IngestResult(
+                                video_id=video.video_id or "",
+                                title=video.title,
+                                chunks=0,
+                                transcript_path=transcript_path,
+                                status="skipped_cached",
+                            )
+                        )
+                        continue
+
+                    progress(f"Usando transcripcion cacheada: {transcript_path.name}")
+                    transcript = json.loads(transcript_path.read_text(encoding="utf-8"))
+                    status = "cached"
+                else:
+                    progress(f"[{index}/{len(videos)}] Descargando audio: {video.webpage_url}")
+                    asset = self.youtube.download_audio(video)
+                    transcript_path = self.settings.transcripts_dir / f"{asset.video_id}.json"
+                    progress(f"Transcribiendo con Whisper/CUDA: {asset.title}")
+                    transcript = self._transcribe_asset(asset, language=language)
+                    transcript_path.write_text(
+                        json.dumps(transcript, ensure_ascii=False, indent=2),
+                        encoding="utf-8",
                     )
-                    continue
+                    status = "transcribed"
 
-                progress(f"Usando transcripcion cacheada: {transcript_path.name}")
-                transcript = json.loads(transcript_path.read_text(encoding="utf-8"))
-                status = "cached"
-            else:
-                progress(f"[{index}/{len(videos)}] Descargando audio: {video.webpage_url}")
-                asset = self.youtube.download_audio(video)
-                transcript_path = self.settings.transcripts_dir / f"{asset.video_id}.json"
-                progress(f"Transcribiendo con Whisper/CUDA: {asset.title}")
-                transcript = self._transcribe_asset(asset, language=language)
-                transcript_path.write_text(
-                    json.dumps(transcript, ensure_ascii=False, indent=2),
-                    encoding="utf-8",
+                chunks = build_chunks(
+                    transcript,
+                    max_seconds=self.settings.chunk_max_seconds,
+                    overlap_seconds=self.settings.chunk_overlap_seconds,
+                    max_chars=self.settings.chunk_max_chars,
                 )
-                status = "transcribed"
+                progress(f"Indexando {len(chunks)} chunks en Chroma")
+                self.knowledge_base.upsert_chunks(chunks)
 
-            chunks = build_chunks(
-                transcript,
-                max_seconds=self.settings.chunk_max_seconds,
-                overlap_seconds=self.settings.chunk_overlap_seconds,
-                max_chars=self.settings.chunk_max_chars,
-            )
-            progress(f"Indexando {len(chunks)} chunks en Chroma")
-            self.knowledge_base.upsert_chunks(chunks)
-
-            results.append(
-                IngestResult(
-                    video_id=transcript["video"]["video_id"],
-                    title=transcript["video"]["title"],
-                    chunks=len(chunks),
-                    transcript_path=transcript_path,
-                    status=status,
+                results.append(
+                    IngestResult(
+                        video_id=transcript["video"]["video_id"],
+                        title=transcript["video"]["title"],
+                        chunks=len(chunks),
+                        transcript_path=transcript_path,
+                        status=status,
+                    )
                 )
-            )
+            except Exception as exc:
+                if not continue_on_error:
+                    raise
+
+                progress(f"[{index}/{len(videos)}] ERROR; continuo con el siguiente: {exc}")
+                results.append(
+                    IngestResult(
+                        video_id=video.video_id or "",
+                        title=video.title,
+                        chunks=0,
+                        transcript_path=transcript_path,
+                        status="failed",
+                        error=str(exc),
+                    )
+                )
 
         return results
 

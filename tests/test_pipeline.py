@@ -47,6 +47,12 @@ class FakeYoutube:
         return SimpleNamespace()
 
 
+class FailingYoutube(FakeYoutube):
+    def download_audio(self, _video):
+        self.downloads += 1
+        raise RuntimeError("download failed")
+
+
 class PipelineTests(unittest.TestCase):
     def test_skip_cached_avoids_download_and_indexing(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -83,6 +89,32 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(kb.upserted, [])
             self.assertEqual(results[0].status, "skipped_cached")
 
+    def test_ingest_continues_when_video_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            settings = self._settings(Path(tmp))
+            settings.ensure_dirs()
+            youtube = FailingYoutube()
+            kb = FakeKnowledgeBase()
+            pipeline = IngestPipeline(settings, kb, FakeWhisper(), youtube)
+
+            results = pipeline.ingest("https://www.youtube.com/@canal/videos")
+
+            self.assertEqual(youtube.downloads, 1)
+            self.assertEqual(results[0].status, "failed")
+            self.assertIn("download failed", results[0].error)
+
+    def test_ingest_can_stop_on_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            settings = self._settings(Path(tmp))
+            settings.ensure_dirs()
+            pipeline = IngestPipeline(settings, FakeKnowledgeBase(), FakeWhisper(), FailingYoutube())
+
+            with self.assertRaises(RuntimeError):
+                pipeline.ingest(
+                    "https://www.youtube.com/@canal/videos",
+                    continue_on_error=False,
+                )
+
     @staticmethod
     def _settings(data_dir: Path) -> Settings:
         return Settings(
@@ -105,4 +137,3 @@ class PipelineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

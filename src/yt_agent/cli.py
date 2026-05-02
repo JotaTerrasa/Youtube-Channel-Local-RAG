@@ -37,6 +37,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Si la transcripcion ya existe, no la reindexa ni descarga audio.",
     )
+    ingest.add_argument(
+        "--stop-on-error",
+        action="store_true",
+        help="Detiene la ingesta si falla un video. Por defecto continua con el siguiente.",
+    )
     ingest.set_defaults(handler=handle_ingest)
 
     ask = subparsers.add_parser("ask", help="Pregunta a la base de conocimiento.")
@@ -80,13 +85,17 @@ def handle_ingest(args: argparse.Namespace) -> None:
         language=args.language,
         force_transcribe=args.force_transcribe,
         skip_cached=args.skip_cached,
+        continue_on_error=not args.stop_on_error,
         on_progress=lambda message: print(f"-> {message}", flush=True),
     )
 
     print("\nIngesta completada:")
     for result in results:
         print(f"- {result.title} [{result.video_id}] - {result.status} - {result.chunks} chunks")
-        print(f"  Transcript: {result.transcript_path}")
+        if result.transcript_path:
+            print(f"  Transcript: {result.transcript_path}")
+        if result.error:
+            print(f"  Error: {result.error}")
 
 
 def handle_ask(args: argparse.Namespace) -> None:

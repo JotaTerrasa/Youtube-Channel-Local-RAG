@@ -58,6 +58,16 @@ yt-agent ingest "https://www.youtube.com/@CANAL/videos" --language es --skip-cac
 
 `--skip-cached` salta videos con una transcripción existente en `data/transcripts`.
 
+### Continuar si un Video Falla
+
+Por defecto, la ingesta continúa si falla un video concreto y marca ese resultado como `failed`. Esto es útil en canales grandes.
+
+Si quieres detener todo al primer fallo:
+
+```powershell
+yt-agent ingest "https://www.youtube.com/@CANAL/videos" --language es --stop-on-error
+```
+
 ### Rehacer Transcripciones
 
 Si cambias el modelo Whisper o quieres regenerar una transcripción:

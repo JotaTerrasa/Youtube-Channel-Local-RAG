@@ -36,6 +36,36 @@ El healthcheck debería mostrar:
 GPU visible
 ```
 
+## Whisper Cierra la Conexión Durante una Ingesta
+
+Si ves algo como:
+
+```text
+RemoteDisconnected: Remote end closed connection without response
+```
+
+normalmente significa que el servicio Whisper dentro de Docker cerró la conexión durante una transcripción. Puede pasar si el contenedor se reinicia, si la GPU está ocupada, si el audio es largo o si el modelo tarda demasiado en responder.
+
+La ingesta guarda cada transcripción completada en `data/transcripts`, así que puedes reanudar sin perder lo anterior:
+
+```powershell
+yt-agent ingest "https://www.youtube.com/@CANAL/videos" --language es
+```
+
+Por defecto, si falla un video concreto, la ingesta continúa con el siguiente. Si prefieres que se detenga al primer error:
+
+```powershell
+yt-agent ingest "https://www.youtube.com/@CANAL/videos" --language es --stop-on-error
+```
+
+Para procesar solo videos que no tengan transcripción cacheada:
+
+```powershell
+yt-agent ingest "https://www.youtube.com/@CANAL/videos" --language es --skip-cached
+```
+
+Si el error se repite en videos largos, baja temporalmente el modelo Whisper en `docker-compose.yml`, por ejemplo de `large-v3` a `medium`, y recrea el servicio.
+
 ## La Primera Transcripción Tarda Mucho
 
 Es normal. La primera transcripción descarga el modelo Whisper definido en `docker-compose.yml`, por defecto `large-v3`, dentro de `data/whisper-cache`.
@@ -155,4 +185,18 @@ Si el canal tiene muchos videos, prueba primero:
 
 ```powershell
 yt-agent ingest "https://www.youtube.com/@CANAL/videos" --max-videos 3 --language es
+```
+
+## Warning de JavaScript Runtime en `yt-dlp`
+
+Si ves:
+
+```text
+No supported JavaScript runtime could be found
+```
+
+no siempre es fatal. Si el audio se descarga correctamente, puedes continuar. YouTube está haciendo que algunos flujos de extracción dependan cada vez más de JavaScript, así que para evitar formatos ausentes o fallos futuros instala un runtime compatible con `yt-dlp`, por ejemplo Deno o Node.js, y mantén `yt-dlp` actualizado:
+
+```powershell
+pip install -U yt-dlp
 ```

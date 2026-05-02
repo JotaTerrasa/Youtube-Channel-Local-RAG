@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "youtube-channel-rag-agent"
+version = "0.1.0"
+description = "Local YouTube knowledge-base agent with LangGraph, CUDA Whisper, ChromaDB, and Ollama."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "chromadb>=0.5.0",
+  "langchain-core>=0.3.0",
+  "langchain-ollama>=0.2.0",
+  "langgraph>=0.2.0",
+  "requests>=2.32.0",
+  "sentence-transformers>=3.0.0",
+  "yt-dlp>=2025.1.15",
+]
+
+[project.scripts]
+yt-agent = "yt_agent.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

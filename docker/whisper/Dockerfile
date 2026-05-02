@@ -1,0 +1,27 @@
+FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      curl \
+      ffmpeg \
+      python3 \
+      python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install \
+      "fastapi>=0.115.0" \
+      "faster-whisper>=1.1.0" \
+      "python-multipart>=0.0.9" \
+      "uvicorn[standard]>=0.30.0"
+
+WORKDIR /app
+COPY app.py /app/app.py
+
+EXPOSE 9000
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "9000"]
+

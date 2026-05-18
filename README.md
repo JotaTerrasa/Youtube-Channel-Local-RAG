@@ -258,6 +258,16 @@ Más detalle en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - [Desarrollo](docs/DEVELOPMENT.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 
+## Decisiones Técnicas
+
+- **RAG local en vez de fine-tuning:** el conocimiento de un canal cambia con frecuencia, así que es más práctico actualizar transcripciones e índices que reentrenar un modelo.
+- **Whisper separado en Docker:** la transcripción tiene dependencias pesadas y distintas necesidades de CPU/CUDA; aislarla permite mantener el entorno Python del agente más simple.
+- **ChromaDB como vector store local:** prioriza una configuración sencilla, persistente y reproducible para uso personal o prototipos sin servicios externos.
+- **Embeddings locales por defecto:** `SentenceTransformers` evita depender de APIs externas y permite trabajar con contenido en español e inglés.
+- **LangGraph para el flujo RAG:** aunque el grafo actual es deliberadamente simple, separa recuperación y generación para poder extender el agente con más pasos.
+- **Fuentes con timestamps:** cada respuesta debe poder verificarse contra el video original, no solo contra el texto recuperado.
+- **CPU por defecto y CUDA opcional:** el modo base funciona en macOS, Windows y Linux; CUDA queda como optimización para equipos con NVIDIA.
+
 ## Configuración
 
 Las variables principales viven en `.env`:

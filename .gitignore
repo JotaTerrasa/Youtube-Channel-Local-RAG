@@ -1,5 +1,6 @@
 .env
 .venv/
+.DS_Store
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -16,4 +17,3 @@ data/whisper-cache/*
 !data/chroma/.gitkeep
 !data/transcripts/.gitkeep
 !data/whisper-cache/.gitkeep
-

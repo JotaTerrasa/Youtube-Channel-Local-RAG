@@ -1,5 +1,7 @@
 # YouTube Channel RAG Agent
 
+[![CI](https://github.com/JotaTerrasa/Youtube-Channel-Local-RAG/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/JotaTerrasa/Youtube-Channel-Local-RAG/actions/workflows/ci.yml)
+
 ## English
 
 Local agent that turns YouTube videos into a searchable knowledge base. It can ingest a single video, a playlist, a channel videos tab, or Shorts, transcribe the audio with Whisper, index transcripts in ChromaDB, and answer questions with a LangGraph agent using Ollama.

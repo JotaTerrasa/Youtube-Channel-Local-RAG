@@ -8,6 +8,21 @@ Local agent that turns YouTube videos into a searchable knowledge base. It can i
 
 The project is designed for specialized channels: courses, technical podcasts, research channels, internal training, interviews, or any video collection where you want to search ideas without watching hours of content again.
 
+> **Architecture at a glance:** YouTube → `yt-dlp` → Whisper → timestamped chunks → local embeddings + ChromaDB → LangGraph + Ollama. [See the full architecture](docs/ARCHITECTURE.md).
+
+## Evidence in the Repository
+
+This is a local, inspectable implementation rather than a hosted demo. The links below point to the code and checks behind its core behavior.
+
+| Capability | Evidence |
+| --- | --- |
+| Resolve YouTube URLs and download audio | [`youtube.py`](src/yt_agent/youtube.py) |
+| Preserve video metadata and timestamped source URLs in chunks | [`chunking.py`](src/yt_agent/chunking.py) · [`test_chunking.py`](tests/test_chunking.py) |
+| Continue ingestion safely after individual video failures and handle cached transcripts | [`pipeline.py`](src/yt_agent/pipeline.py) · [`test_pipeline.py`](tests/test_pipeline.py) |
+| Return answers with time ranges and timestamped source links | [`graph.py`](src/yt_agent/graph.py) |
+| Support portable CPU and optional CUDA deployments | [`docker-compose.yml`](docker-compose.yml) · [`docker-compose.cuda.yml`](docker-compose.cuda.yml) |
+| Run package installation, unit tests, and syntax compilation on GitHub | [`ci.yml`](.github/workflows/ci.yml) · [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) |
+
 ## What It Does
 
 - Transcribes YouTube videos with Whisper in Docker.
@@ -337,6 +352,21 @@ MIT. See [LICENSE](LICENSE).
 Agente local para convertir videos de YouTube en una base de conocimiento consultable. Puede ingerir un video, una playlist, la pestaña de videos de un canal o los Shorts, transcribir el audio con Whisper, indexar las transcripciones en ChromaDB y responder preguntas con un agente LangGraph usando Ollama.
 
 El proyecto está pensado para trabajar con canales especializados: cursos, podcasts técnicos, canales de investigación, formación interna, entrevistas o cualquier colección de videos donde quieras buscar ideas sin volver a ver horas de contenido.
+
+> **Arquitectura rápida:** YouTube → `yt-dlp` → Whisper → chunks con timestamps → embeddings locales + ChromaDB → LangGraph + Ollama. [Ver la arquitectura completa](docs/ARCHITECTURE.md).
+
+## Evidencia en el Repositorio
+
+Es una implementación local e inspeccionable, no una demo alojada. Los enlaces siguientes apuntan al código y las comprobaciones que respaldan sus comportamientos principales.
+
+| Capacidad | Evidencia |
+| --- | --- |
+| Resolver URLs de YouTube y descargar audio | [`youtube.py`](src/yt_agent/youtube.py) |
+| Conservar metadatos del vídeo y URLs con timestamp en los chunks | [`chunking.py`](src/yt_agent/chunking.py) · [`test_chunking.py`](tests/test_chunking.py) |
+| Continuar la ingesta de forma segura ante fallos individuales y gestionar transcripciones cacheadas | [`pipeline.py`](src/yt_agent/pipeline.py) · [`test_pipeline.py`](tests/test_pipeline.py) |
+| Devolver respuestas con rangos temporales y enlaces de fuente con timestamp | [`graph.py`](src/yt_agent/graph.py) |
+| Soportar despliegues portables en CPU y CUDA opcional | [`docker-compose.yml`](docker-compose.yml) · [`docker-compose.cuda.yml`](docker-compose.cuda.yml) |
+| Ejecutar instalación del paquete, tests unitarios y compilación de sintaxis en GitHub | [`ci.yml`](.github/workflows/ci.yml) · [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) |
 
 ## Qué Hace
 

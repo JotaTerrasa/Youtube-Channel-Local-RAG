@@ -19,6 +19,7 @@ This is a local, inspectable implementation rather than a hosted demo. The links
 | Resolve YouTube URLs and download audio | [`youtube.py`](src/yt_agent/youtube.py) |
 | Preserve video metadata and timestamped source URLs in chunks | [`chunking.py`](src/yt_agent/chunking.py) · [`test_chunking.py`](tests/test_chunking.py) |
 | Continue ingestion safely after individual video failures and handle cached transcripts | [`pipeline.py`](src/yt_agent/pipeline.py) · [`test_pipeline.py`](tests/test_pipeline.py) |
+| Observe the cached pipeline and timestamped provenance without external services | [`OFFLINE_FIXTURE_DEMO.md`](docs/OFFLINE_FIXTURE_DEMO.md) · [`offline_fixture_demo.py`](scripts/offline_fixture_demo.py) |
 | Return answers with time ranges and timestamped source links | [`graph.py`](src/yt_agent/graph.py) |
 | Support portable CPU and optional CUDA deployments | [`docker-compose.yml`](docker-compose.yml) · [`docker-compose.cuda.yml`](docker-compose.cuda.yml) |
 | Run package installation, unit tests, and syntax compilation on GitHub | [`ci.yml`](.github/workflows/ci.yml) · [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) |

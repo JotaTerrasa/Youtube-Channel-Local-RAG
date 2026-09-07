@@ -3,13 +3,15 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 from .chunking import build_chunks
 from .config import Settings
-from .vectorstore import ChromaKnowledgeBase
 from .whisper_client import WhisperClient
 from .youtube import VideoAsset, YoutubeIngestor
+
+if TYPE_CHECKING:
+    from .vectorstore import ChromaKnowledgeBase
 
 
 ProgressCallback = Callable[[str], None]
